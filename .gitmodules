@@ -1,0 +1,3 @@
+[submodule "3rdparty/tgbot-cpp"]
+	path = 3rdparty/tgbot-cpp
+	url = https://github.com/reo7sp/tgbot-cpp
