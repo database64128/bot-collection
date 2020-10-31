@@ -103,7 +103,7 @@ int main(int arc, char *argv[])
         message->messageId = msg->messageId;
         message->status = ONGOING_A;
         message->message = text;
-        message->count = 20;
+        message->count = 15;
     };
 
     const auto onStart = [&](const TgBot::Message::Ptr ptr) {
