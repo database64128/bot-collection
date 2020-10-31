@@ -75,8 +75,9 @@ int main(int arc, char *argv[])
                 else if (differ && hasLastMessage)
                     bot.getApi().editMessageText("`[  OK  ] Reached target " + message->message + "`", lastChatId, lastMsgId, {}, "MarkdownV2");
             }
-            catch (...)
+            catch (TgBot::TgException &e)
             {
+                std::cout << "error: " << e.what() << std::endl;
             }
             //
             lastChatId = currentChatId;
