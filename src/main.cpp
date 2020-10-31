@@ -36,6 +36,7 @@ struct SystemdMessage
     int32_t messageId;
     SYSTEMD_MESSAGE_STATUS status;
     std::string message;
+    int count;
 };
 
 SystemdMessage *message;
@@ -58,8 +59,8 @@ int main(int arc, char *argv[])
     const auto worker_do_job = [&]() {
         do
         {
-            sleep(2);
-            static long lastMsgId = 0, lastChatId = 0;
+            usleep(0.8 * 1000000);
+            static long lastMsgId = 0, lastChatId = 0, lastCount = 0;
             if (!message)
                 continue;
             const auto currentMsgId = message->messageId;
@@ -70,10 +71,16 @@ int main(int arc, char *argv[])
             //
             try
             {
-                if (!differ)
+                const auto reached = "`[  OK  ] Reached target ";
+                if (message->count < 0)
+                    continue;
+                else if (message->count == 0)
+                    bot.getApi().editMessageText(reached + message->message + "`", currentChatId, currentMsgId, {}, "MarkdownV2");
+                else if (!differ)
                     bot.getApi().editMessageText(get_message(*message), currentChatId, currentMsgId, {}, "MarkdownV2");
-                else if (differ && hasLastMessage)
-                    bot.getApi().editMessageText("`[  OK  ] Reached target " + message->message + "`", lastChatId, lastMsgId, {}, "MarkdownV2");
+                else if (hasLastMessage && differ)
+                    bot.getApi().editMessageText(reached + message->message + "`", lastChatId, lastMsgId, {}, "MarkdownV2");
+                message->count--;
             }
             catch (TgBot::TgException &e)
             {
@@ -96,6 +103,7 @@ int main(int arc, char *argv[])
         message->messageId = msg->messageId;
         message->status = ONGOING_A;
         message->message = text;
+        message->count = 20;
     };
 
     const auto onStart = [&](const TgBot::Message::Ptr ptr) {
