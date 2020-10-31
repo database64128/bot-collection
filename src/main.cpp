@@ -58,7 +58,7 @@ int main(int arc, char *argv[])
     const auto worker_do_job = [&]() {
         do
         {
-            sleep(1);
+            sleep(2);
             static long lastMsgId = 0, lastChatId = 0;
             if (!message)
                 continue;
