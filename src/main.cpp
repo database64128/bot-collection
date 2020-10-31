@@ -1,6 +1,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <string>
 #include <tgbot/tgbot.h>
 #include <thread>
 
@@ -8,20 +9,22 @@ using namespace TgBot;
 
 enum SYSTEMD_MESSAGE_STATUS
 {
-    ONGOING_A, // [***  ]
-    ONGOING_B, // [ *** ]
-    ONGOING_C, // [  ***]
-    ONGOING_D, // [*  **]
-    ONGOING_E, // [**  *]
+    ONGOING_A, // [***   ]
+    ONGOING_B, // [ ***  ]
+    ONGOING_C, // [  *** ]
+    ONGOING_D, // [   ***]
+    ONGOING_E, // [*   **]
+    ONGOING_F, // [**   *]
     NB_COUNT
 };
 
 std::map<SYSTEMD_MESSAGE_STATUS, std::string> SYSTEMD_MESSAGE_STATUS_STR{
-    { ONGOING_A, "[***  ]" }, //
-    { ONGOING_B, "[ *** ]" }, //
-    { ONGOING_C, "[  ***]" }, //
-    { ONGOING_D, "[*  **]" }, //
-    { ONGOING_E, "[**  *]" }  //
+    { ONGOING_A, "[***   ]" }, //
+    { ONGOING_B, "[ ***  ]" }, //
+    { ONGOING_C, "[  *** ]" }, //
+    { ONGOING_D, "[   ***]" }, //
+    { ONGOING_E, "[*   **]" }, //
+    { ONGOING_F, "[**   *]" }  //
 };
 
 typedef int32_t chatid_t;
@@ -35,31 +38,65 @@ struct SystemdMessage
     std::string message;
 };
 
+SystemdMessage *message;
+
 std::string get_message(SystemdMessage &msg)
 {
     msg.status = SYSTEMD_MESSAGE_STATUS((msg.status + 1) % NB_COUNT);
     return "`" + SYSTEMD_MESSAGE_STATUS_STR[msg.status] + " " + msg.message + "`";
 }
 
+std::string remove_from_string(std::string &text)
+{
+    size_t pos = text.find(" ");
+    return text.substr(pos + 1);
+}
+
 int main(int arc, char *argv[])
 {
-    std::list<std::thread *> workers;
-    TgBot::Bot bot("............................");
-    const auto worker_do_job = [&](SystemdMessage msg) {
-        int n = 0;
+    TgBot::Bot bot(getenv("TELEGRAM_API_KEY"));
+    const auto worker_do_job = [&]() {
         do
         {
-            bot.getApi().editMessageText(get_message(msg), msg.chatId, msg.messageId, {}, "MarkdownV2");
             sleep(1);
-            n++;
-        } while (n <= 100);
+            static long lastMsgId = 0, lastChatId = 0;
+            if (!message)
+                continue;
+            const auto currentMsgId = message->messageId;
+            const auto currentChatId = message->chatId;
+            //
+            const auto hasLastMessage = lastMsgId != 0 && lastChatId != 0;
+            const auto differ = currentMsgId != lastMsgId || currentChatId != lastChatId;
+            //
+            try
+            {
+                if (!differ)
+                    bot.getApi().editMessageText(get_message(*message), currentChatId, currentMsgId, {}, "MarkdownV2");
+                else if (differ && hasLastMessage)
+                    bot.getApi().editMessageText("`[  OK  ] Reached target " + message->message + "`", lastChatId, lastMsgId, {}, "MarkdownV2");
+            }
+            catch (...)
+            {
+            }
+            //
+            lastChatId = currentChatId;
+            lastMsgId = currentMsgId;
+        } while (true);
     };
 
+    std::thread worker(worker_do_job);
+
     const auto onSystemd = [&](const TgBot::Message::Ptr ptr) {
-        const auto msg = bot.getApi().sendMessage(ptr->chat->id, "`[ WAIT] Starting: " + ptr->text + "`", false, 0, {}, "MarkdownV2");
-        const auto t = new std::thread(worker_do_job, SystemdMessage{ msg->chat->id, msg->messageId, ONGOING_A, ptr->text });
-        workers.push_back(t);
+        auto text = remove_from_string(ptr->text);
+        const auto msg = bot.getApi().sendMessage(ptr->chat->id, "`[ WAIT ] Starting " + text + "`", false, 0, {}, "MarkdownV2");
+        if (!message)
+            message = new SystemdMessage;
+        message->chatId = msg->chat->id;
+        message->messageId = msg->messageId;
+        message->status = ONGOING_A;
+        message->message = text;
     };
+
     const auto onStart = [&](const TgBot::Message::Ptr ptr) {
         bot.getApi().sendMessage(ptr->chat->id, "`S Y S T E M D`", true, 0, {}, "MarkdownV2");
     };
