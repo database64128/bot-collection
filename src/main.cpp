@@ -59,7 +59,7 @@ int main(int arc, char *argv[])
     const auto worker_do_job = [&]() {
         do
         {
-            usleep(0.8 * 1000000);
+            usleep(1.6 * 1000000);
             static long lastMsgId = 0, lastChatId = 0, lastCount = 0;
             if (!message)
                 continue;
