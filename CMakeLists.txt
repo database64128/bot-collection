@@ -12,14 +12,14 @@ option(HAS_SHUIBIAO_BOT OFF)
 
 if(HAS_ALL_BOTS OR HAS_SYSTEMD_BOT)
     add_executable(shuibiao_bot src/shuibiao_bot.cpp)
-    target_compile_definitions(shuibiao-bot PRIVATE BOT_NAME="shuibiao-bot")
-    list(APPEND BOT_TARGETS shuibiao-bot)
+    target_compile_definitions(shuibiao_bot PRIVATE BOT_NAME="shuibiao_bot")
+    list(APPEND BOT_TARGETS shuibiao_bot)
 endif()
 
 if(HAS_ALL_BOTS OR HAS_SHUIBIAO_BOT)
     add_executable(systemd_bot src/systemd-bot.cpp)
-    target_compile_definitions(systemd-bot PRIVATE BOT_NAME="systemd-bot")
-    list(APPEND BOT_TARGETS systemd-bot)
+    target_compile_definitions(systemd_bot PRIVATE BOT_NAME="systemd_bot")
+    list(APPEND BOT_TARGETS systemd_bot)
 endif()
 
 foreach(BOT ${BOT_TARGETS})
