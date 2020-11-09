@@ -12,7 +12,7 @@ option(HAS_SHUIBIAO_BOT OFF)
 option(HAS_BIAODIAN_BOT OFF)
 
 if(HAS_ALL_BOTS OR HAS_SYSTEMD_BOT)
-    add_executable(shuibiao_bot src/shuibiao_bot.cpp)
+    add_executable(shuibiao_bot src/shuibiao-bot.cpp)
     target_compile_definitions(shuibiao_bot PRIVATE BOT_NAME="shuibiao_bot")
     list(APPEND BOT_TARGETS shuibiao_bot)
 endif()
