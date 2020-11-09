@@ -9,7 +9,9 @@ using namespace TgBot;
 
 int main(int arc, char *argv[])
 {
-    TgBot::Bot bot(getenv("SHUIBIAO_BOT_API_KEY"));
+    const auto api_key_env = BOT_NAME "_API_KEY";
+    std::cout << "Reading env: " << api_key_env << std::endl;
+    TgBot::Bot bot(getenv(api_key_env));
 
     const std::vector<std::string> questions = { "你发这些什么目的？",        //
                                                  "谁指使你的？",              //
@@ -28,12 +30,22 @@ int main(int arc, char *argv[])
             const auto replyMsgId = ptr->replyToMessage ? ptr->replyToMessage->messageId : 0;
             bot.getApi().sendMessage(ptr->chat->id, message, false, replyMsgId);
         }
-        catch (...)
+        catch (std::exception &e)
         {
+            std::cout << e.what() << std::endl;
         }
     };
 
-    const auto onStart = [&](const TgBot::Message::Ptr ptr) { bot.getApi().sendMessage(ptr->chat->id, "跟我们走一趟", false, ptr->messageId); };
+    const auto onStart = [&](const TgBot::Message::Ptr ptr) {
+        try
+        {
+            bot.getApi().sendMessage(ptr->chat->id, "跟我们走一趟", false, ptr->messageId);
+        }
+        catch (std::exception &e)
+        {
+            std::cout << e.what() << std::endl;
+        }
+    };
 
     bot.getEvents().onCommand("start", onStart);
     bot.getEvents().onCommand("question", onQuestion);

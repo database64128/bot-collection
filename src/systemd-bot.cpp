@@ -55,34 +55,40 @@ std::string remove_from_string(std::string &text)
 
 int main(int arc, char *argv[])
 {
-    TgBot::Bot bot(getenv("TELEGRAM_API_KEY"));
+    const auto api_key_env = BOT_NAME "_API_KEY";
+    std::cout << "Reading env: " << api_key_env << std::endl;
+    TgBot::Bot bot(getenv(api_key_env));
+
     const auto worker_do_job = [&]() {
         do
         {
-            usleep(1.6 * 1000000);
             static long lastMsgId = 0, lastChatId = 0, lastCount = 0;
             if (!message)
                 continue;
+            const auto reached = "`[  OK  ] Reached target ";
+            const auto reachedMessage = reached + message->message + "`";
+            const auto normalMessage = get_message(*message);
+            //
             const auto currentMsgId = message->messageId;
             const auto currentChatId = message->chatId;
             //
             const auto hasLastMessage = lastMsgId != 0 && lastChatId != 0;
             const auto differ = currentMsgId != lastMsgId || currentChatId != lastChatId;
             //
+            usleep(1.6 * 1000000);
             try
             {
-                const auto reached = "`[  OK  ] Reached target ";
                 if (message->count < 0)
                     continue;
                 else if (message->count == 0)
-                    bot.getApi().editMessageText(reached + message->message + "`", currentChatId, currentMsgId, {}, "MarkdownV2");
+                    bot.getApi().editMessageText(reachedMessage, currentChatId, currentMsgId, {}, "MarkdownV2");
                 else if (!differ)
-                    bot.getApi().editMessageText(get_message(*message), currentChatId, currentMsgId, {}, "MarkdownV2");
+                    bot.getApi().editMessageText(normalMessage, currentChatId, currentMsgId, {}, "MarkdownV2");
                 else if (hasLastMessage && differ)
-                    bot.getApi().editMessageText(reached + message->message + "`", lastChatId, lastMsgId, {}, "MarkdownV2");
+                    bot.getApi().editMessageText(reachedMessage, lastChatId, lastMsgId, {}, "MarkdownV2");
                 message->count--;
             }
-            catch (TgBot::TgException &e)
+            catch (std::exception &e)
             {
                 std::cout << "error: " << e.what() << std::endl;
             }
@@ -103,7 +109,7 @@ int main(int arc, char *argv[])
         message->messageId = msg->messageId;
         message->status = ONGOING_A;
         message->message = text;
-        message->count = 15;
+        message->count = 10;
     };
 
     const auto onStart = [&](const TgBot::Message::Ptr ptr) {
@@ -122,7 +128,7 @@ int main(int arc, char *argv[])
             longPoll.start();
         }
     }
-    catch (TgBot::TgException &e)
+    catch (std::exception &e)
     {
         std::cout << "error: " << e.what() << std::endl;
     }
