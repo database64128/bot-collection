@@ -26,14 +26,12 @@ int main(int arc, char *argv[])
         const auto msg = remove_from_string(ptr->text);
         const auto repeatMsg = msg.empty() ? "?" : msg;
         const auto replyMsgId = ptr->replyToMessage ? ptr->replyToMessage->messageId : 0;
-        const auto realMsg = [=] {
-            const auto t = (rand() % 50) + 1;
-            std::string msg;
-            for (auto i = 0; i < t; i++)
-                msg += repeatMsg;
-            return msg;
-        }();
-
+        //
+        const auto t = (rand() % 25) + 1;
+        std::string realMsg;
+        for (auto i = 0; i < t; i++)
+            realMsg += repeatMsg + " ";
+        //
         try
         {
             bot.getApi().sendMessage(ptr->chat->id, realMsg, false, replyMsgId);
