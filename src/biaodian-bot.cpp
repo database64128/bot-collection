@@ -45,7 +45,8 @@ int main(int arc, char *argv[])
     const auto onStart = [&](const TgBot::Message::Ptr ptr) {
         try
         {
-            bot.getApi().sendMessage(ptr->chat->id, R"(`!@#$%^&*()_+-={}|[]\:";'<>?,./`)", true, 0, {}, "MarkdownV2");
+            const auto replyMsgId = ptr->replyToMessage ? ptr->replyToMessage->messageId : 0;
+            bot.getApi().sendMessage(ptr->chat->id, R"(`!@#$%^&*()_+-={}|[]\:";'<>?,./`)", true, replyMsgId, {}, "MarkdownV2");
         }
         catch (std::exception &e)
         {

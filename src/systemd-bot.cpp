@@ -62,6 +62,7 @@ int main(int arc, char *argv[])
     const auto worker_do_job = [&]() {
         do
         {
+            usleep(1.6 * 1000000);
             static long lastMsgId = 0, lastChatId = 0, lastCount = 0;
             if (!message)
                 continue;
@@ -75,7 +76,6 @@ int main(int arc, char *argv[])
             const auto hasLastMessage = lastMsgId != 0 && lastChatId != 0;
             const auto differ = currentMsgId != lastMsgId || currentChatId != lastChatId;
             //
-            usleep(1.6 * 1000000);
             try
             {
                 if (message->count < 0)
@@ -113,7 +113,8 @@ int main(int arc, char *argv[])
     };
 
     const auto onStart = [&](const TgBot::Message::Ptr ptr) {
-        bot.getApi().sendMessage(ptr->chat->id, "`S Y S T E M D`", true, 0, {}, "MarkdownV2");
+        const auto replyMsgId = ptr->replyToMessage ? ptr->replyToMessage->messageId : 0;
+        bot.getApi().sendMessage(ptr->chat->id, "`S Y S T E M D`", true, replyMsgId, {}, "MarkdownV2");
     };
 
     bot.getEvents().onCommand("start", onStart);
