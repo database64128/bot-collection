@@ -10,20 +10,13 @@
 
 using namespace TgBot;
 
-std::string remove_from_string(std::string &text)
-{
-    size_t pos = text.find(" ");
-    const auto subs = text.substr(pos + 1);
-    return subs == text ? "" : subs;
-}
-
 int main(int arc, char *argv[])
 {
     const auto api_key_env = BOT_NAME "_API_KEY";
     std::cout << "Reading env: " << api_key_env << std::endl;
     TgBot::Bot bot(getenv(api_key_env));
 
-    const auto onAssign = [&](const TgBot::Message::Ptr ptr) {
+    const auto onTypo = [&](const TgBot::Message::Ptr ptr) {
         try
         {
             const auto replyMsgId = ptr->replyToMessage ? ptr->replyToMessage->messageId : 0;
@@ -81,7 +74,7 @@ int main(int arc, char *argv[])
     };
 
     bot.getEvents().onCommand("start", onStart);
-    bot.getEvents().onCommand("typo", onAssign);
+    bot.getEvents().onCommand("typo", onTypo);
     bot.getEvents().onInlineQuery(onInlineQuery);
 
     try
