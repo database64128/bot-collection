@@ -23,7 +23,7 @@ int main(int arc, char *argv[])
     TgBot::Bot bot(getenv(api_key_env));
 
     const std::vector<std::string> OKText = { "好的", "行", "可以", "完全同意", "OK", "我觉得好", "好吧", "嗯！" };
-    const std::vector<std::string> StudyText = { "好的", "行", "可以", "完全同意", "OK", "我觉得好", "好吧", "嗯！" };
+    const std::vector<std::string> StudyText = { "快去学习", "今天学了吗?", "今天学习了吗?", "啥时候学习?", "忘记学习了吗?", "快去学习啊" };
     const auto onOK = [&](const TgBot::Message::Ptr ptr) {
         try
         {
