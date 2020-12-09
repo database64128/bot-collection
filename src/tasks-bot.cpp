@@ -22,7 +22,8 @@ int main(int arc, char *argv[])
     std::cout << "Reading env: " << api_key_env << std::endl;
     TgBot::Bot bot(getenv(api_key_env));
 
-    const std::vector<std::string> OKText = { "好的", "行", "可以", "完全同意", "OK", "保证完成任务", "我觉得好", "好吧", "我来" };
+    const std::vector<std::string> OKText = { "好的", "行", "可以", "完全同意", "OK", "我觉得好", "好吧", "嗯！" };
+    const std::vector<std::string> StudyText = { "好的", "行", "可以", "完全同意", "OK", "我觉得好", "好吧", "嗯！" };
     const auto onOK = [&](const TgBot::Message::Ptr ptr) {
         try
         {
@@ -36,7 +37,19 @@ int main(int arc, char *argv[])
             std::cout << e.what() << std::endl;
         }
     };
-
+    const auto onStudy = [&](const TgBot::Message::Ptr ptr) {
+        try
+        {
+            const auto count = StudyText.size();
+            const auto message = StudyText[rand() % count];
+            const auto replyMsgId = ptr->replyToMessage ? ptr->replyToMessage->messageId : 0;
+            bot.getApi().sendMessage(ptr->chat->id, message, false, replyMsgId);
+        }
+        catch (std::exception &e)
+        {
+            std::cout << e.what() << std::endl;
+        }
+    };
     const auto onAssign = [&](const TgBot::Message::Ptr ptr) {
         try
         {
@@ -75,6 +88,7 @@ int main(int arc, char *argv[])
 
     bot.getEvents().onCommand("start", onStart);
     bot.getEvents().onCommand("ok", onOK);
+    bot.getEvents().onCommand("study", onStudy);
     bot.getEvents().onCommand("assign", onAssign);
     bot.getEvents().onCommand("unassign", onUnAssign);
 
