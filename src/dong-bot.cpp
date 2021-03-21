@@ -47,10 +47,11 @@ int main(int arc, char *argv[])
         try
         {
 #define 懂了(x) ptr->text.find(x) != std::string::npos
-            if (懂了("懂了") || 懂了("知道了") || 懂了("明白了") || 懂了("好的") || 懂了("为啥") || 懂了("什么") || 懂了("咋回事"))
+            if (懂了("懂了") || 懂了("不懂") || 懂了("知道了") || 懂了("明白了") || 懂了("不明白") || 懂了("好的") || 懂了("为啥") || 懂了("什么") ||
+                懂了("咋回事"))
             {
                 const auto message = questions[rand() % count];
-                const auto replyMsgId = ptr->replyToMessage ? ptr->replyToMessage->messageId : 0;
+                const auto replyMsgId = ptr->messageId;
                 bot.getApi().sendMessage(ptr->chat->id, message, false, replyMsgId);
             }
         }
